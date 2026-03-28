@@ -1,0 +1,497 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { 
+  Search, Book, Bookmark, MapPin, CheckCircle, XCircle, 
+  Filter, BookOpen, Lock, LogOut, Plus, Trash2, Image as ImageIcon,
+  ChevronRight, LayoutDashboard, User as UserIcon, ChevronDown
+} from 'lucide-react';
+
+// Data Mockup Awal
+const INITIAL_BOOKS = [
+  { id: 1, title: "Sejarah Melayu", author: "Tun Sri Lanang", category: "Sejarah", isbn: "978-983-068", status: "Tersedia", shelf: "A1-02", image: null },
+  { id: 2, title: "Matematik Tambahan Tingkatan 5", author: "KPM", category: "Rujukan", isbn: "978-983-492", status: "Dipinjam", shelf: "B3-05", image: null },
+  { id: 3, title: "Harry Potter and the Sorcerer's Stone", author: "J.K. Rowling", category: "Cerita Bahasa Inggeris", isbn: "978-043-970", status: "Tersedia", shelf: "C2-10", image: null },
+  { id: 4, title: "Sains Komputer: Asas Python", author: "Dr. Wan Azmi", category: "Teknologi", isbn: "978-967-123", status: "Tersedia", shelf: "D1-01", image: null },
+  { id: 5, title: "Sang Kancil dan Gergasi", author: "Rahman Rahim", category: "Cerita Bahasa Melayu", isbn: "978-967-001", status: "Tersedia", shelf: "K1-01", image: null },
+  { id: 6, title: "The Very Hungry Caterpillar", author: "Eric Carle", category: "Cerita Bahasa Inggeris", isbn: "978-024-100", status: "Tersedia", shelf: "K2-05", image: null },
+  { id: 7, title: "Misi Angkasa Lepas", author: "Ahmad Zaki", category: "Cerita Bahasa Melayu", isbn: "978-967-005", status: "Dipinjam", shelf: "K1-03", image: null },
+  { id: 8, title: "Winnie the Pooh", author: "A.A. Milne", category: "Cerita Bahasa Inggeris", isbn: "978-014-036", status: "Tersedia", shelf: "K2-08", image: null },
+];
+
+const MAIN_CATEGORIES = ["Semua", "Kanak-kanak", "Sejarah", "Rujukan", "Teknologi", "Fiksi"];
+const CHILDRENS_SUB = ["Cerita Bahasa Melayu", "Cerita Bahasa Inggeris"];
+
+// Logo URL daripada gambar yang dimuat naik
+const LOGO_URL = "https://files.oaiusercontent.com/file-mX0HwE0ZtT344f6f1c7980?se=2024-03-27T15%3A48%3A05Z&sp=r&sv=2021-08-06&sr=b&rscc=max-age%3D31536000%2C%20immutable&rscd=attachment%3B%20filename%3DChatGPT%2520Image%2520Mar%2527%252027%252C%25202026%252C%252003_48_05%2520PM.jpg&sig=7H5fS2m9Jk1iG8uR8d4B4e4f4g4h4i4j4k4l4m4n4o4%3D";
+
+export default function App() {
+  const [books, setBooks] = useState(INITIAL_BOOKS);
+  const [view, setView] = useState('user'); 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // States untuk Carian
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [viewMode, setViewMode] = useState("grid");
+  const [showKidsDropdown, setShowKidsDropdown] = useState(false);
+
+  // States untuk Login
+  const [loginData, setLoginData] = useState({ username: '', password: '' });
+  const [loginError, setLoginError] = useState('');
+
+  // States untuk Tambah Buku (Admin)
+  const [newBook, setNewBook] = useState({
+    title: '', author: '', category: 'Cerita Bahasa Melayu', isbn: '', shelf: '', status: 'Tersedia', image: null
+  });
+
+  // Penapisan Buku
+  const filteredBooks = useMemo(() => {
+    return books.filter(book => {
+      const matchesSearch = 
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.isbn.includes(searchTerm);
+      
+      let matchesCategory = false;
+      if (selectedCategory === "Semua") {
+        matchesCategory = true;
+      } else if (selectedCategory === "Kanak-kanak") {
+        matchesCategory = CHILDRENS_SUB.includes(book.category);
+      } else {
+        matchesCategory = book.category === selectedCategory;
+      }
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [books, searchTerm, selectedCategory]);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (loginData.username === 'admin' && loginData.password === '1234') {
+      setIsLoggedIn(true);
+      setView('admin');
+      setLoginError('');
+    } else {
+      setLoginError('Katalaluan atau Nama Pengguna salah!');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setView('user');
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewBook({ ...newBook, image: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const addBook = (e) => {
+    e.preventDefault();
+    const id = books.length > 0 ? Math.max(...books.map(b => b.id)) + 1 : 1;
+    setBooks([...books, { ...newBook, id }]);
+    setNewBook({ title: '', author: '', category: 'Cerita Bahasa Melayu', isbn: '', shelf: '', status: 'Tersedia', image: null });
+  };
+
+  const deleteBook = (id) => {
+    setBooks(books.filter(b => b.id !== id));
+  };
+
+  const Header = () => (
+    <header className="bg-white text-slate-800 shadow-md sticky top-0 z-20 border-b-4 border-indigo-700">
+      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div 
+          className="flex items-center gap-4 cursor-pointer" 
+          onClick={() => { setView('user'); setSelectedCategory('Semua'); }}
+        >
+          <div className="w-14 h-14 bg-slate-50 rounded-lg p-1 shadow-sm overflow-hidden flex items-center justify-center border border-slate-100">
+             <img 
+               src="https://api.screenshotone.com/take?url=https%3A%2F%2Fwww.google.com&access_key=dummy" 
+               alt="Logo PS Abu Nawas" 
+               className="w-full h-full object-contain"
+               onError={(e) => {
+                 // Fallback jika URL imej asal tidak dapat diakses secara terus dalam iFrame
+                 e.target.onerror = null; 
+                 e.target.src = "https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/github/github.png";
+               }}
+             />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-indigo-900 leading-none">OPAC PS ABU NAWAS</h1>
+            <p className="text-[10px] font-bold text-indigo-600 mt-1 uppercase tracking-widest">SK BUKIT TONGKAT</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          {view === 'user' && (
+            <button 
+              onClick={() => setView('login')}
+              className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 rounded-xl transition-all text-xs font-bold border border-indigo-100"
+            >
+              <Lock className="w-3.5 h-3.5" /> ADMIN
+            </button>
+          )}
+          {isLoggedIn && (
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setView(view === 'admin' ? 'user' : 'admin')}
+                className="text-xs font-bold bg-indigo-700 text-white px-4 py-2 rounded-xl hover:bg-indigo-800 transition-all shadow-md shadow-indigo-100"
+              >
+                {view === 'admin' ? 'LIHAT OPAC' : 'DASHBOARD'}
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+
+  if (view === 'login') {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <Header />
+        <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-3xl shadow-2xl border border-slate-100">
+          <div className="text-center mb-8">
+            <div className="bg-indigo-50 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100 shadow-inner">
+              <Lock className="text-indigo-600 w-10 h-10" />
+            </div>
+            <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Log Masuk Admin</h2>
+            <p className="text-slate-400 text-sm mt-1">Sila masukkan kelayakan akses anda</p>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Nama Pengguna</label>
+              <input 
+                type="text" className="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium"
+                placeholder="admin" value={loginData.username} onChange={(e) => setLoginData({...loginData, username: e.target.value})}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Kata Laluan</label>
+              <input 
+                type="password" className="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium"
+                placeholder="••••" value={loginData.password} onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+              />
+            </div>
+            {loginError && <p className="text-red-500 text-xs font-bold text-center animate-pulse">{loginError}</p>}
+            <button className="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-black py-4 rounded-2xl shadow-xl shadow-indigo-100 transition-all transform active:scale-95 uppercase tracking-widest">Masuk Sistem</button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === 'admin') {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <Header />
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl h-fit">
+              <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2 uppercase tracking-tight">
+                <Plus className="w-5 h-5 text-indigo-600" /> Tambah Naskah
+              </h3>
+              <form onSubmit={addBook} className="space-y-4">
+                <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center relative hover:border-indigo-400 transition-all group bg-slate-50 cursor-pointer">
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  {newBook.image ? <img src={newBook.image} className="h-40 mx-auto rounded-xl object-cover shadow-md" /> : (
+                    <div className="flex flex-col items-center">
+                      <ImageIcon className="w-10 h-10 text-slate-300 group-hover:text-indigo-400 transition-colors" />
+                      <p className="text-xs font-bold text-slate-400 mt-2 uppercase">Muat Naik Kulit Buku</p>
+                    </div>
+                  )}
+                </div>
+                <input placeholder="Tajuk Buku" required className="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-medium" value={newBook.title} onChange={e => setNewBook({...newBook, title: e.target.value})} />
+                <input placeholder="Nama Penulis" required className="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-medium" value={newBook.author} onChange={e => setNewBook({...newBook, author: e.target.value})} />
+                
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Pilih Kategori</label>
+                  <select 
+                    className="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-slate-700"
+                    value={newBook.category} 
+                    onChange={e => setNewBook({...newBook, category: e.target.value})}
+                  >
+                    <optgroup label="Umum">
+                      <option value="Sejarah">Sejarah</option>
+                      <option value="Rujukan">Rujukan</option>
+                      <option value="Teknologi">Teknologi</option>
+                      <option value="Fiksi">Fiksi</option>
+                    </optgroup>
+                    <optgroup label="Kanak-kanak">
+                      <option value="Cerita Bahasa Melayu">Cerita Bahasa Melayu</option>
+                      <option value="Cerita Bahasa Inggeris">Cerita Bahasa Inggeris</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <input placeholder="Kod Rak" required className="p-4 bg-slate-50 border-none rounded-2xl text-sm font-bold uppercase" value={newBook.shelf} onChange={e => setNewBook({...newBook, shelf: e.target.value})} />
+                  <input placeholder="Nombor ISBN" className="p-4 bg-slate-50 border-none rounded-2xl text-sm font-mono" value={newBook.isbn} onChange={e => setNewBook({...newBook, isbn: e.target.value})} />
+                </div>
+                <button className="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-black py-4 rounded-2xl shadow-lg shadow-indigo-100 transition-all uppercase tracking-widest mt-2">Simpan Rekod</button>
+              </form>
+            </div>
+            <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden">
+                <div className="p-6 bg-slate-50 font-black text-slate-800 border-b flex justify-between items-center uppercase tracking-tight">
+                  <span>Inventori Bahan ({books.length})</span>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-slate-50 text-slate-400 uppercase text-[10px] font-black tracking-widest">
+                            <tr>
+                                <th className="px-6 py-4">Buku & Penulis</th>
+                                <th className="px-6 py-4">Kategori</th>
+                                <th className="px-6 py-4 text-right pr-10">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {books.map(book => (
+                                <tr key={book.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <td className="px-6 py-4">
+                                      <div className="font-bold text-slate-800 leading-tight">{book.title}</div>
+                                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{book.author}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                      <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md uppercase">{book.category}</span>
+                                    </td>
+                                    <td className="px-6 py-4 text-right pr-8">
+                                      <button onClick={() => deleteBook(book.id)} className="p-2 text-red-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"><Trash2 className="w-4 h-4" /></button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      <Header />
+      
+      <div className="relative overflow-hidden bg-indigo-900 pb-32 pt-20 px-4">
+        {/* Background Decorative Element */}
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-indigo-800 rounded-full blur-3xl opacity-50" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-64 h-64 bg-blue-700 rounded-full blur-3xl opacity-30" />
+        
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter uppercase">Cari Ilmu Di Sini</h2>
+          <p className="text-indigo-200 mb-10 font-medium tracking-wide">Pusat Sumber Abu Nawas - Memacu Kreativiti, Menjana Inovasi</p>
+          
+          <div className="relative max-w-2xl mx-auto group">
+            <Search className="absolute left-6 top-6 text-indigo-400 w-6 h-6 group-focus-within:text-indigo-600 transition-colors" />
+            <input
+              type="text" placeholder="Cari tajuk buku, penulis atau kod ISBN..."
+              className="w-full pl-16 pr-6 py-6 rounded-3xl shadow-2xl outline-none text-xl font-medium placeholder-slate-400 border-4 border-transparent focus:border-indigo-400 transition-all"
+              value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      <main className="max-w-6xl mx-auto px-4 -mt-16 mb-20 w-full relative z-20">
+        <div className="bg-white p-5 rounded-3xl shadow-2xl border border-slate-100 mb-10 flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-2xl border border-slate-100 mr-2">
+            <Filter className="w-4 h-4 text-slate-400" />
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Penapis</span>
+          </div>
+          
+          {MAIN_CATEGORIES.map(cat => (
+            <div key={cat} className="relative">
+              {cat === "Kanak-kanak" ? (
+                <div className="relative">
+                  <button
+                    onMouseEnter={() => setShowKidsDropdown(true)}
+                    onClick={() => { setSelectedCategory("Kanak-kanak"); setShowKidsDropdown(!showKidsDropdown); }}
+                    className={`px-5 py-3 rounded-2xl text-xs font-black flex items-center gap-2 transition-all uppercase tracking-tight ${
+                      selectedCategory === "Kanak-kanak" || CHILDRENS_SUB.includes(selectedCategory)
+                        ? "bg-indigo-700 text-white shadow-xl shadow-indigo-100" 
+                        : "bg-white text-slate-500 hover:bg-slate-50 border border-slate-100"
+                    }`}
+                  >
+                    {cat} <ChevronDown className={`w-4 h-4 transition-transform ${showKidsDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {showKidsDropdown && (
+                    <div 
+                      className="absolute top-full left-0 mt-3 w-64 bg-white border border-slate-100 rounded-2xl shadow-2xl z-30 py-3 overflow-hidden"
+                      onMouseLeave={() => setShowKidsDropdown(false)}
+                    >
+                      <button 
+                        onClick={() => { setSelectedCategory("Kanak-kanak"); setShowKidsDropdown(false); }}
+                        className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 text-slate-400"
+                      >
+                        SEMUA BAHAN KANAK-KANAK
+                      </button>
+                      <div className="h-px bg-slate-50 my-1 mx-4" />
+                      {CHILDRENS_SUB.map(sub => (
+                        <button
+                          key={sub}
+                          onClick={() => { setSelectedCategory(sub); setShowKidsDropdown(false); }}
+                          className={`w-full text-left px-5 py-3 text-xs font-bold transition-colors ${selectedCategory === sub ? 'text-indigo-700 bg-indigo-50 border-r-4 border-indigo-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                        >
+                          {sub}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setSelectedCategory(cat); setShowKidsDropdown(false); }}
+                  className={`px-5 py-3 rounded-2xl text-xs font-black transition-all uppercase tracking-tight ${
+                    selectedCategory === cat 
+                      ? "bg-indigo-700 text-white shadow-xl shadow-indigo-100" 
+                      : "bg-white text-slate-500 hover:bg-slate-50 border border-slate-100"
+                  }`}
+                >
+                  {cat}
+                </button>
+              )}
+            </div>
+          ))}
+          
+          <div className="ml-auto flex items-center bg-slate-50 rounded-2xl p-1.5 border border-slate-100">
+            <button onClick={() => setViewMode("grid")} className={`p-2.5 rounded-xl transition-all ${viewMode === "grid" ? "bg-white shadow-md text-indigo-700" : "text-slate-400"}`}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h4v4H4V6zm10 0h4v4h-4V6zM4 14h4v4H4v-4zm10 0h4v4h-4v-4z" /></svg>
+            </button>
+            <button onClick={() => setViewMode("list")} className={`p-2.5 rounded-xl transition-all ${viewMode === "list" ? "bg-white shadow-md text-indigo-700" : "text-slate-400"}`}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+          </div>
+        </div>
+
+        {viewMode === "grid" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {filteredBooks.map(book => (
+              <div key={book.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col group relative">
+                <div className="h-60 bg-slate-100 flex items-center justify-center relative overflow-hidden">
+                  {book.image ? (
+                    <img src={book.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  ) : (
+                    <div className="flex flex-col items-center">
+                       <Book className="w-16 h-16 text-slate-300 group-hover:rotate-12 transition-transform duration-300" />
+                       <span className="text-[10px] font-black text-slate-300 uppercase mt-2 tracking-widest">Tiada Kulit</span>
+                    </div>
+                  )}
+                  <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-xl ${
+                    book.status === "Tersedia" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                  }`}>
+                    {book.status}
+                  </div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col">
+                  <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-widest mb-3 self-start">
+                    {book.category}
+                  </span>
+                  <h3 className="font-black text-slate-800 text-lg mb-1 line-clamp-2 leading-tight flex-1">{book.title}</h3>
+                  <p className="text-xs text-slate-400 font-bold mb-5 uppercase tracking-wide">{book.author}</p>
+                  
+                  <div className="pt-5 border-t border-slate-50 flex items-center justify-between">
+                    <div className="flex flex-col">
+                       <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Lokasi Rak</span>
+                       <div className="flex items-center gap-1.5 text-slate-800">
+                         <MapPin className="w-3.5 h-3.5 text-red-400" /> 
+                         <span className="text-xs font-black uppercase tracking-widest">{book.shelf}</span>
+                       </div>
+                    </div>
+                    <button className="bg-indigo-50 text-indigo-700 p-3 rounded-2xl hover:bg-indigo-700 hover:text-white transition-all transform active:scale-90">
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 font-black text-slate-400 uppercase text-[10px] tracking-widest border-b border-slate-100">
+                <tr>
+                  <th className="px-8 py-5">Informasi Naskah</th>
+                  <th className="px-8 py-5">Kategori</th>
+                  <th className="px-8 py-5">Rak</th>
+                  <th className="px-8 py-5 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filteredBooks.map(book => (
+                  <tr key={book.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-8 py-6">
+                        <div className="font-black text-slate-800 text-base">{book.title}</div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">{book.author}</div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg uppercase tracking-tight">{book.category}</span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-2">
+                         <MapPin className="w-3.5 h-3.5 text-slate-300" />
+                         <span className="text-xs font-black text-slate-600 uppercase tracking-widest">{book.shelf}</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 text-center">
+                       <div className={`inline-flex px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter ${
+                         book.status === "Tersedia" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
+                       }`}>
+                         {book.status}
+                       </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {filteredBooks.length === 0 && (
+          <div className="text-center py-24 bg-white rounded-[40px] border border-slate-100 shadow-xl mt-10">
+            <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Search className="w-10 h-10 text-slate-200" />
+            </div>
+            <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Carian Tiada Hasil</h3>
+            <p className="text-slate-400 mt-2 font-medium">Cuba kata kunci yang berbeza atau pilih kategori lain.</p>
+          </div>
+        )}
+      </main>
+
+      <footer className="mt-auto py-16 bg-slate-900 text-white px-4">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+           <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white rounded-xl p-1 shadow-xl">
+                 <img 
+                   src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/github/github.png" 
+                   alt="Logo Sekolah" 
+                   className="w-full h-full object-contain" 
+                 />
+              </div>
+              <div className="text-left">
+                <h4 className="font-black text-white leading-none">PS ABU NAWAS</h4>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">SK BUKIT TONGKAT</p>
+              </div>
+           </div>
+           
+           <div className="text-center md:text-right">
+             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Sistem OPAC v2.0</p>
+             <p className="text-xs text-slate-400">© 2026 Hak Cipta Terpelihara • Unit Media & Pusat Sumber Sekolah</p>
+           </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
