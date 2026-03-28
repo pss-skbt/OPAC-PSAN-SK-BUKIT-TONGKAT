@@ -9,213 +9,316 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .dropdown-content { display: none; }
         .dropdown:hover .dropdown-content { display: block; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
 
-    <!-- Header Section -->
+    <!-- Header -->
     <header class="bg-white border-b-4 border-indigo-700 shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-4 cursor-pointer" onclick="window.location.reload()">
-                <div class="w-16 h-16 bg-slate-50 rounded-xl p-1 shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden">
-                    <!-- Pastikan fail logo ini berada dalam folder yang sama di GitHub atau gunakan URL penuh -->
+            <div class="flex items-center gap-4 cursor-pointer" onclick="showView('user')">
+                <div class="w-14 h-14 bg-slate-50 rounded-xl p-1 shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden">
                     <img src="https://api.allorigins.win/raw?url=https://files.oaiusercontent.com/file-mX0HwE0ZtT344f6f1c7980?se=2024-03-27T15%3A48%3A05Z&sp=r&sv=2021-08-06&sr=b&rscc=max-age%3D31536000%2C%20immutable&rscd=attachment%3B%20filename%3DChatGPT%2520Image%2520Mar%2527%252027%252C%25202026%252C%252003_48_05%2520PM.jpg&sig=7H5fS2m9Jk1iG8uR8d4B4e4f4g4h4i4j4k4l4m4n4o4%3D" 
-                         alt="Logo PSS" 
+                         alt="Logo PSS Abu Nawas" 
                          class="w-full h-full object-contain"
                          onerror="this.src='https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/github/github.png'">
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black text-indigo-900 leading-none">OPAC PS ABU NAWAS</h1>
-                    <p class="text-[11px] font-bold text-indigo-600 mt-1 uppercase tracking-[0.2em]">SK BUKIT TONGKAT</p>
+                    <h1 class="text-xl font-black text-indigo-900 leading-none uppercase">OPAC PS ABU NAWAS</h1>
+                    <p class="text-[10px] font-bold text-indigo-600 mt-1 uppercase tracking-widest">SK BUKIT TONGKAT</p>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <button onclick="toggleAdminView()" class="hidden md:flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-5 py-2.5 rounded-2xl transition-all text-xs font-black border border-indigo-100 shadow-sm">
-                    <i class="fas fa-lock"></i> PENTADBIR
+            <div id="authButtons">
+                <button onclick="showView('login')" class="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-5 py-2 rounded-xl transition-all text-xs font-black border border-indigo-100 uppercase tracking-wider">
+                    <i class="fas fa-lock text-[10px]"></i> Log Masuk Pentadbir
+                </button>
+            </div>
+            <div id="adminButtons" class="hidden flex items-center gap-3">
+                <span class="text-xs font-bold text-slate-400">ADMIN MODE</span>
+                <button onclick="handleLogout()" class="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors">
+                    <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="bg-indigo-900 pt-16 pb-28 px-4 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-800 rounded-full blur-[100px] opacity-50 -translate-y-1/2 translate-x-1/2"></div>
-        <div class="max-w-4xl mx-auto text-center relative z-10">
-            <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight uppercase">Gerbang Carian Ilmu</h2>
-            <p class="text-indigo-200 text-lg mb-10 font-medium">Pusat Sumber Abu Nawas - Memacu Kreativiti, Menjana Inovasi</p>
-            
-            <div class="max-w-2xl mx-auto relative group">
-                <i class="fas fa-search absolute left-6 top-6 text-indigo-400 text-xl"></i>
-                <input type="text" id="searchInput" onkeyup="searchBooks()" placeholder="Cari tajuk, penulis atau kod ISBN..." 
-                    class="w-full pl-16 pr-6 py-6 rounded-3xl shadow-2xl outline-none text-xl font-medium border-4 border-transparent focus:border-indigo-400 transition-all">
-            </div>
-        </div>
-    </section>
-
-    <!-- Filter & Content Section -->
-    <main class="max-w-7xl mx-auto px-4 -mt-12 mb-20 relative z-20">
-        <div class="bg-white p-4 rounded-3xl shadow-xl border border-slate-100 flex flex-wrap items-center gap-4 mb-10">
-            <div class="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <i class="fas fa-filter"></i> Kategori
-            </div>
-            
-            <button onclick="filterCategory('Semua')" class="cat-btn bg-indigo-700 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-tight shadow-lg shadow-indigo-100 transition-all">Semua</button>
-            
-            <!-- Dropdown Kanak-kanak -->
-            <div class="relative dropdown group">
-                <button class="cat-btn bg-white text-slate-500 border border-slate-100 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-tight flex items-center gap-2 hover:bg-slate-50 transition-all">
-                    Kanak-Kanak <i class="fas fa-chevron-down text-[10px] transition-transform group-hover:rotate-180"></i>
-                </button>
-                <div class="dropdown-content absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50">
-                    <button onclick="filterCategory('Kanak-kanak')" class="w-full text-left px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-700 transition-colors uppercase tracking-tight">Semua Kanak-kanak</button>
-                    <div class="h-px bg-slate-50 my-1 mx-4"></div>
-                    <button onclick="filterCategory('Cerita Bahasa Melayu')" class="w-full text-left px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Cerita Bahasa Melayu</button>
-                    <button onclick="filterCategory('Cerita Bahasa Inggeris')" class="w-full text-left px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">Cerita Bahasa Inggeris</button>
+    <!-- USER VIEW -->
+    <div id="userView" class="view">
+        <section class="bg-indigo-900 pt-16 pb-24 px-4 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-800 rounded-full blur-[100px] opacity-40 -translate-y-1/2 translate-x-1/2"></div>
+            <div class="max-w-4xl mx-auto text-center relative z-10">
+                <h2 class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter uppercase">Gerbang Carian Ilmu</h2>
+                <p class="text-indigo-200 mb-10 font-medium uppercase tracking-widest text-xs">PS Abu Nawas - Memacu Kreativiti, Menjana Inovasi</p>
+                <div class="max-w-2xl mx-auto relative group">
+                    <i class="fas fa-search absolute left-6 top-6 text-indigo-400 text-xl group-focus-within:text-indigo-600 transition-colors"></i>
+                    <input type="text" id="searchInput" onkeyup="renderBooks()" placeholder="Cari tajuk buku, penulis atau ISBN..." 
+                        class="w-full pl-16 pr-6 py-6 rounded-3xl shadow-2xl outline-none text-xl font-medium border-4 border-transparent focus:border-indigo-400 transition-all">
                 </div>
             </div>
+        </section>
 
-            <button onclick="filterCategory('Sejarah')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-tight hover:bg-slate-50 transition-all">Sejarah</button>
-            <button onclick="filterCategory('Rujukan')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-tight hover:bg-slate-50 transition-all">Rujukan</button>
-            <button onclick="filterCategory('Teknologi')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-tight hover:bg-slate-50 transition-all">Teknologi</button>
-        </div>
-
-        <!-- Book Grid -->
-        <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <!-- Data akan dimasukkan menggunakan JS -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="hidden text-center py-20 bg-white rounded-[40px] border border-slate-100 shadow-xl">
-            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fas fa-search text-slate-200 text-4xl"></i>
+        <main class="max-w-7xl mx-auto px-4 -mt-10 mb-20 relative z-20">
+            <div class="bg-white p-4 rounded-3xl shadow-xl border border-slate-100 flex flex-wrap items-center gap-3 mb-8">
+                <div class="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-r border-slate-100 mr-2">
+                    <i class="fas fa-filter"></i> Kategori
+                </div>
+                <button onclick="setCategory('Semua')" class="cat-btn bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase transition-all">Semua</button>
+                <div class="relative dropdown">
+                    <button class="cat-btn bg-white text-slate-500 border border-slate-100 px-5 py-2.5 rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-slate-50">
+                        Kanak-Kanak <i class="fas fa-chevron-down text-[10px]"></i>
+                    </button>
+                    <div class="dropdown-content absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-100 py-2 z-50">
+                        <button onclick="setCategory('Cerita Bahasa Melayu')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-700">Cerita Bahasa Melayu</button>
+                        <button onclick="setCategory('Cerita Bahasa Inggeris')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-700">Cerita Bahasa Inggeris</button>
+                    </div>
+                </div>
+                <button onclick="setCategory('Sejarah')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-5 py-2.5 rounded-xl text-xs font-black uppercase hover:bg-slate-50 transition-all">Sejarah</button>
+                <button onclick="setCategory('Rujukan')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-5 py-2.5 rounded-xl text-xs font-black uppercase hover:bg-slate-50 transition-all">Rujukan</button>
             </div>
-            <h3 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Tiada Hasil Ditemui</h3>
-            <p class="text-slate-400 mt-2 font-medium">Cuba kata kunci lain atau pilih kategori yang berbeza.</p>
-        </div>
-    </main>
 
-    <footer class="bg-slate-900 py-16 px-4 text-white">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-white rounded-xl p-1 shadow-xl">
-                    <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/github/github.png" alt="Logo" class="w-full h-full object-contain">
+            <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+            <div id="emptyState" class="hidden text-center py-24 bg-white rounded-[40px] shadow-xl border border-slate-100">
+                <i class="fas fa-book-open text-slate-100 text-7xl mb-4"></i>
+                <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Carian Tiada Hasil</h3>
+                <p class="text-slate-400 text-sm">Sila cuba kata kunci atau kategori yang lain.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- LOGIN VIEW -->
+    <div id="loginView" class="view hidden">
+        <div class="max-w-md mx-auto mt-20 p-10 bg-white rounded-[40px] shadow-2xl border border-slate-100 fade-in text-center">
+            <div class="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-indigo-100 shadow-inner">
+                <i class="fas fa-user-shield text-indigo-600 text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-800 uppercase tracking-tight mb-2">Log Masuk Admin</h2>
+            <p class="text-slate-400 text-sm mb-8">Hanya untuk kegunaan pengawas PSS dan pentadbir.</p>
+            
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-3 mb-1 block">Nama Pengguna</label>
+                    <input type="text" id="username" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold" placeholder="admin">
                 </div>
                 <div>
-                    <h4 class="font-black text-white leading-none">PS ABU NAWAS</h4>
-                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">SK BUKIT TONGKAT</p>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-3 mb-1 block">Kata Laluan</label>
+                    <input type="password" id="password" class="w-full p-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold" placeholder="••••">
+                </div>
+                <div id="loginError" class="hidden text-red-500 text-[10px] font-black uppercase text-center py-2 animate-pulse">Katalaluan Salah!</div>
+                <button onclick="handleLogin()" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-black py-4 rounded-2xl shadow-xl shadow-indigo-100 transition-all uppercase tracking-widest mt-4">MASUK SISTEM</button>
+                <button onclick="showView('user')" class="w-full py-4 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-indigo-600 transition-colors">Kembali ke Carian</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div id="adminView" class="view hidden">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Add Book Form -->
+                <div class="lg:col-span-1 bg-white p-8 rounded-[40px] shadow-xl border border-slate-100 h-fit">
+                    <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-3 uppercase tracking-tight">
+                        <i class="fas fa-plus-circle text-indigo-600"></i> Tambah Naskah
+                    </h3>
+                    <div class="space-y-4">
+                        <input type="text" id="addTitle" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm" placeholder="Tajuk Buku">
+                        <input type="text" id="addAuthor" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm" placeholder="Nama Penulis">
+                        <select id="addCategory" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm">
+                            <option value="Cerita Bahasa Melayu">Cerita Bahasa Melayu</option>
+                            <option value="Cerita Bahasa Inggeris">Cerita Bahasa Inggeris</option>
+                            <option value="Sejarah">Sejarah</option>
+                            <option value="Rujukan">Rujukan</option>
+                            <option value="Teknologi">Teknologi</option>
+                        </select>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="text" id="addShelf" class="p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm uppercase" placeholder="KOD RAK">
+                            <input type="text" id="addIsbn" class="p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm" placeholder="ISBN">
+                        </div>
+                        <button onclick="addBook()" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-black py-4 rounded-2xl shadow-xl transition-all uppercase tracking-widest">Simpan Buku</button>
+                    </div>
+                </div>
+                <!-- Inventory List -->
+                <div class="lg:col-span-2 bg-white rounded-[40px] shadow-xl border border-slate-100 overflow-hidden">
+                    <div class="p-6 bg-slate-50 border-b border-slate-100 font-black text-slate-800 uppercase tracking-tight">Inventori Semasa</div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <tr>
+                                    <th class="px-6 py-4">Buku & Penulis</th>
+                                    <th class="px-6 py-4">Kategori</th>
+                                    <th class="px-6 py-4 text-right">Tindakan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTableBody" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="text-center md:text-right">
-                <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">OPAC SYSTEM V3.0</p>
-                <p class="text-xs text-slate-400">© 2026 Hak Cipta Terpelihara • Unit Media & Pusat Sumber Sekolah</p>
+        </div>
+    </div>
+
+    <footer class="bg-slate-900 py-12 px-4 text-white mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-center md:text-left">
+                <h4 class="font-black text-white leading-none uppercase tracking-tighter text-lg">PS ABU NAWAS</h4>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">Sistem OPAC Sk Bukit Tongkat</p>
             </div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">© 2026 Hak Cipta Terpelihara</p>
         </div>
     </footer>
 
     <script>
-        // Data Buku
-        const BOOKS = [
-            { id: 1, title: "Sejarah Melayu", author: "Tun Sri Lanang", category: "Sejarah", isbn: "978-983-068", status: "Tersedia", shelf: "A1-02" },
-            { id: 2, title: "Matematik Tambahan Tingkatan 5", author: "KPM", category: "Rujukan", isbn: "978-983-492", status: "Dipinjam", shelf: "B3-05" },
-            { id: 3, title: "Harry Potter and the Sorcerer's Stone", author: "J.K. Rowling", category: "Cerita Bahasa Inggeris", isbn: "978-043-970", status: "Tersedia", shelf: "C2-10" },
-            { id: 4, title: "Asas Python", author: "Dr. Wan Azmi", category: "Teknologi", isbn: "978-967-123", status: "Tersedia", shelf: "D1-01" },
-            { id: 5, title: "Sang Kancil dan Gergasi", author: "Rahman Rahim", category: "Cerita Bahasa Melayu", isbn: "978-967-001", status: "Tersedia", shelf: "K1-01" },
-            { id: 6, title: "The Very Hungry Caterpillar", author: "Eric Carle", category: "Cerita Bahasa Inggeris", isbn: "978-024-100", status: "Tersedia", shelf: "K2-05" },
-            { id: 7, title: "Misi Angkasa Lepas", author: "Ahmad Zaki", category: "Cerita Bahasa Melayu", isbn: "978-967-005", status: "Dipinjam", shelf: "K1-03" },
-            { id: 8, title: "Winnie the Pooh", author: "A.A. Milne", category: "Cerita Bahasa Inggeris", isbn: "978-014-036", status: "Tersedia", shelf: "K2-08" },
+        // DATA BUKU
+        let books = JSON.parse(localStorage.getItem('pss_books')) || [
+            { id: 1, title: "Misi Angkasa Lepas", author: "Dr. Nazmi", category: "Cerita Bahasa Melayu", isbn: "978-01", shelf: "K1-01", status: "Tersedia" },
+            { id: 2, title: "The Hungry Caterpillar", author: "Eric Carle", category: "Cerita Bahasa Inggeris", isbn: "978-02", shelf: "K2-05", status: "Dipinjam" },
+            { id: 3, title: "Sejarah Kesultanan Melayu", author: "Tun Ahmad", category: "Sejarah", isbn: "978-03", shelf: "S3-01", status: "Tersedia" }
         ];
 
         let currentCategory = "Semua";
 
-        function renderBooks(filterText = "") {
+        // VIEW CONTROLLER
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+            document.getElementById(viewId + 'View').classList.remove('hidden');
+            
+            if (viewId === 'admin') {
+                renderAdminTable();
+            } else if (viewId === 'user') {
+                renderBooks();
+            }
+            window.scrollTo(0, 0);
+        }
+
+        // AUTHENTICATION
+        function handleLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const error = document.getElementById('loginError');
+
+            if (user === 'admin' && pass === '1234') {
+                document.getElementById('authButtons').classList.add('hidden');
+                document.getElementById('adminButtons').classList.remove('hidden');
+                error.classList.add('hidden');
+                showView('admin');
+            } else {
+                error.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            document.getElementById('authButtons').classList.remove('hidden');
+            document.getElementById('adminButtons').classList.add('hidden');
+            showView('user');
+        }
+
+        // BOOK LOGIC
+        function setCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-700', 'text-white', 'shadow-lg');
+                btn.classList.add('bg-white', 'text-slate-500', 'border-slate-100');
+            });
+            event.currentTarget.classList.add('bg-indigo-700', 'text-white', 'shadow-lg');
+            renderBooks();
+        }
+
+        function renderBooks() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
             const grid = document.getElementById('bookGrid');
-            const emptyState = document.getElementById('emptyState');
+            const empty = document.getElementById('emptyState');
             grid.innerHTML = "";
 
-            const filtered = BOOKS.filter(book => {
-                const matchesSearch = book.title.toLowerCase().includes(filterText.toLowerCase()) || 
-                                    book.author.toLowerCase().includes(filterText.toLowerCase());
-                
-                let matchesCat = false;
-                if (currentCategory === "Semua") {
-                    matchesCat = true;
-                } else if (currentCategory === "Kanak-kanak") {
-                    matchesCat = (book.category === "Cerita Bahasa Melayu" || book.category === "Cerita Bahasa Inggeris");
-                } else {
-                    matchesCat = book.category === currentCategory;
-                }
-
+            const filtered = books.filter(b => {
+                const matchesSearch = b.title.toLowerCase().includes(search) || b.author.toLowerCase().includes(search);
+                const matchesCat = currentCategory === "Semua" || b.category === currentCategory;
                 return matchesSearch && matchesCat;
             });
 
             if (filtered.length === 0) {
-                emptyState.classList.remove('hidden');
+                empty.classList.remove('hidden');
                 return;
             }
 
-            emptyState.classList.add('hidden');
-            filtered.forEach(book => {
-                const card = `
-                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col group">
-                        <div class="h-60 bg-slate-100 flex items-center justify-center relative overflow-hidden">
-                            <i class="fas fa-book text-5xl text-slate-300 group-hover:scale-110 transition-transform duration-500"></i>
-                            <div class="absolute bottom-4 left-4 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg ${book.status === 'Tersedia' ? 'bg-green-500' : 'bg-red-500'} text-white">
-                                ${book.status}
+            empty.classList.add('hidden');
+            filtered.forEach(b => {
+                grid.innerHTML += `
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col group fade-in">
+                        <div class="h-56 bg-slate-50 flex items-center justify-center relative">
+                            <i class="fas fa-book-open text-slate-200 text-5xl group-hover:scale-110 transition-transform"></i>
+                            <div class="absolute bottom-4 left-4 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter ${b.status === 'Tersedia' ? 'bg-green-500' : 'bg-red-500'} text-white shadow-lg">
+                                ${b.status}
                             </div>
                         </div>
-                        <div class="p-6 flex-1 flex flex-col">
-                            <span class="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2.5 py-1.5 rounded-lg uppercase tracking-widest mb-3 self-start">
-                                ${book.category}
-                            </span>
-                            <h3 class="font-black text-slate-800 text-lg mb-1 line-clamp-2 leading-tight flex-1">${book.title}</h3>
-                            <p class="text-[11px] text-slate-400 font-bold mb-5 uppercase tracking-wide">${book.author}</p>
-                            
-                            <div class="pt-5 border-t border-slate-50 flex items-center justify-between">
-                                <div class="flex flex-col text-left">
-                                   <span class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-1">Kod Rak</span>
-                                   <div class="flex items-center gap-1.5 text-slate-800 font-black text-xs uppercase">
-                                     <i class="fas fa-map-marker-alt text-red-400"></i> ${book.shelf}
-                                   </div>
+                        <div class="p-6">
+                            <span class="text-[8px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-widest mb-2 inline-block">${b.category}</span>
+                            <h3 class="font-black text-slate-800 text-base mb-1 line-clamp-2 leading-tight">${b.title}</h3>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-4">${b.author}</p>
+                            <div class="pt-4 border-t border-slate-50 flex items-center justify-between">
+                                <div class="flex items-center gap-1.5 text-slate-800 font-black text-[10px] uppercase">
+                                    <i class="fas fa-map-marker-alt text-red-400"></i> ${b.shelf}
                                 </div>
-                                <button class="bg-indigo-50 text-indigo-700 p-3 rounded-2xl hover:bg-indigo-700 hover:text-white transition-all transform active:scale-90">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
+                                <i class="fas fa-arrow-right text-indigo-200 text-xs"></i>
                             </div>
                         </div>
                     </div>
                 `;
-                grid.innerHTML += card;
             });
         }
 
-        function searchBooks() {
-            const text = document.getElementById('searchInput').value;
-            renderBooks(text);
-        }
-
-        function filterCategory(cat) {
-            currentCategory = cat;
-            
-            // Kemaskini Gaya Butang
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-700', 'text-white', 'shadow-lg', 'shadow-indigo-100');
-                btn.classList.add('bg-white', 'text-slate-500', 'border-slate-100');
+        function renderAdminTable() {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = "";
+            books.forEach(b => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-800">${b.title}</div>
+                            <div class="text-[10px] text-slate-400 font-bold uppercase">${b.author}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md uppercase">${b.category}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="deleteBook(${b.id})" class="text-red-300 hover:text-red-600 p-2"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `;
             });
+        }
 
-            // Set butang aktif (Sangat asas untuk demo)
-            event.target.classList.add('bg-indigo-700', 'text-white', 'shadow-lg');
+        function addBook() {
+            const title = document.getElementById('addTitle').value;
+            const author = document.getElementById('addAuthor').value;
+            const category = document.getElementById('addCategory').value;
+            const shelf = document.getElementById('addShelf').value;
+            const isbn = document.getElementById('addIsbn').value;
+
+            if (!title || !author) return alert("Sila isi tajuk dan penulis!");
+
+            const newBook = {
+                id: Date.now(),
+                title, author, category, shelf: shelf || "K1", isbn: isbn || "-", status: "Tersedia"
+            };
+
+            books.unshift(newBook);
+            localStorage.setItem('pss_books', JSON.stringify(books));
+            renderAdminTable();
             
-            renderBooks(document.getElementById('searchInput').value);
+            // Clear fields
+            document.getElementById('addTitle').value = "";
+            document.getElementById('addAuthor').value = "";
         }
 
-        function toggleAdminView() {
-            alert("Sistem Log Masuk Pentadbir diaktifkan secara dalaman.");
+        function deleteBook(id) {
+            books = books.filter(b => b.id !== id);
+            localStorage.setItem('pss_books', JSON.stringify(books));
+            renderAdminTable();
         }
 
-        // Jalankan render awal
         window.onload = () => renderBooks();
     </script>
 </body>
