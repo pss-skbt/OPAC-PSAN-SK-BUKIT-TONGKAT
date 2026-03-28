@@ -13,6 +13,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .dropdown-content { display: none; }
         .dropdown:hover .dropdown-content { display: block; }
+        .image-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 1rem; border: 2px dashed #e2e8f0; margin-bottom: 1rem; display: flex; items-center; justify-center; overflow: hidden; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -124,6 +125,13 @@
                         <i class="fas fa-plus-circle text-indigo-600"></i> Tambah Naskah
                     </h3>
                     <div class="space-y-4">
+                        <div id="imagePreviewContainer" class="image-preview">
+                            <span class="text-slate-300 text-[10px] font-bold uppercase tracking-widest">Tiada Gambar</span>
+                        </div>
+                        <label class="block">
+                            <span class="sr-only">Pilih Gambar</span>
+                            <input type="file" id="addImage" accept="image/*" onchange="previewImage(event)" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                        </label>
                         <input type="text" id="addTitle" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm" placeholder="Tajuk Buku">
                         <input type="text" id="addAuthor" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm" placeholder="Nama Penulis">
                         <select id="addCategory" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm">
@@ -173,12 +181,13 @@
     <script>
         // DATA BUKU
         let books = JSON.parse(localStorage.getItem('pss_books')) || [
-            { id: 1, title: "Misi Angkasa Lepas", author: "Dr. Nazmi", category: "Cerita Bahasa Melayu", isbn: "978-01", shelf: "K1-01", status: "Tersedia" },
-            { id: 2, title: "The Hungry Caterpillar", author: "Eric Carle", category: "Cerita Bahasa Inggeris", isbn: "978-02", shelf: "K2-05", status: "Dipinjam" },
-            { id: 3, title: "Sejarah Kesultanan Melayu", author: "Tun Ahmad", category: "Sejarah", isbn: "978-03", shelf: "S3-01", status: "Tersedia" }
+            { id: 1, title: "Misi Angkasa Lepas", author: "Dr. Nazmi", category: "Cerita Bahasa Melayu", isbn: "978-01", shelf: "K1-01", status: "Tersedia", image: null },
+            { id: 2, title: "The Hungry Caterpillar", author: "Eric Carle", category: "Cerita Bahasa Inggeris", isbn: "978-02", shelf: "K2-05", status: "Dipinjam", image: null },
+            { id: 3, title: "Sejarah Kesultanan Melayu", author: "Tun Ahmad", category: "Sejarah", isbn: "978-03", shelf: "S3-01", status: "Tersedia", image: null }
         ];
 
         let currentCategory = "Semua";
+        let currentImageBase64 = null;
 
         // VIEW CONTROLLER
         function showView(viewId) {
@@ -215,6 +224,19 @@
             showView('user');
         }
 
+        // IMAGE PREVIEW
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageBase64 = e.target.result;
+                    document.getElementById('imagePreviewContainer').innerHTML = `<img src="${currentImageBase64}" class="w-full h-full object-cover">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
         // BOOK LOGIC
         function setCategory(cat) {
             currentCategory = cat;
@@ -245,10 +267,14 @@
 
             empty.classList.add('hidden');
             filtered.forEach(b => {
+                const imageHtml = b.image 
+                    ? `<img src="${b.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">`
+                    : `<i class="fas fa-book-open text-slate-200 text-5xl group-hover:scale-110 transition-transform"></i>`;
+
                 grid.innerHTML += `
                     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col group fade-in">
-                        <div class="h-56 bg-slate-50 flex items-center justify-center relative">
-                            <i class="fas fa-book-open text-slate-200 text-5xl group-hover:scale-110 transition-transform"></i>
+                        <div class="h-56 bg-slate-50 flex items-center justify-center relative overflow-hidden">
+                            ${imageHtml}
                             <div class="absolute bottom-4 left-4 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter ${b.status === 'Tersedia' ? 'bg-green-500' : 'bg-red-500'} text-white shadow-lg">
                                 ${b.status}
                             </div>
@@ -275,9 +301,14 @@
             books.forEach(b => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/50">
-                        <td class="px-6 py-4">
-                            <div class="font-bold text-slate-800">${b.title}</div>
-                            <div class="text-[10px] text-slate-400 font-bold uppercase">${b.author}</div>
+                        <td class="px-6 py-4 flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden flex items-center justify-center flex-shrink-0">
+                                ${b.image ? `<img src="${b.image}" class="w-full h-full object-cover">` : `<i class="fas fa-image text-slate-300"></i>`}
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-800">${b.title}</div>
+                                <div class="text-[10px] text-slate-400 font-bold uppercase">${b.author}</div>
+                            </div>
                         </td>
                         <td class="px-6 py-4">
                             <span class="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md uppercase">${b.category}</span>
@@ -301,7 +332,8 @@
 
             const newBook = {
                 id: Date.now(),
-                title, author, category, shelf: shelf || "K1", isbn: isbn || "-", status: "Tersedia"
+                title, author, category, shelf: shelf || "K1", isbn: isbn || "-", status: "Tersedia",
+                image: currentImageBase64
             };
 
             books.unshift(newBook);
@@ -311,6 +343,11 @@
             // Clear fields
             document.getElementById('addTitle').value = "";
             document.getElementById('addAuthor').value = "";
+            document.getElementById('addShelf').value = "";
+            document.getElementById('addIsbn').value = "";
+            document.getElementById('addImage').value = "";
+            document.getElementById('imagePreviewContainer').innerHTML = `<span class="text-slate-300 text-[10px] font-bold uppercase tracking-widest">Tiada Gambar</span>`;
+            currentImageBase64 = null;
         }
 
         function deleteBook(id) {
