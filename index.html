@@ -14,9 +14,15 @@
         .dropdown-content { display: none; }
         .dropdown:hover .dropdown-content { display: block; }
         .image-preview { width: 100%; height: 150px; object-fit: cover; border-radius: 1rem; border: 2px dashed #e2e8f0; margin-bottom: 1rem; display: flex; items-center; justify-center; overflow: hidden; }
+        
+        /* Custom scrollbar for better look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #818cf8; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="bg-slate-50 min-h-screen flex flex-col">
 
     <!-- Header -->
     <header class="bg-white border-b-4 border-indigo-700 shadow-md sticky top-0 z-50">
@@ -49,43 +55,38 @@
 
     <!-- USER VIEW -->
     <div id="userView" class="view">
-        <section class="bg-indigo-900 pt-16 pb-24 px-4 relative overflow-hidden">
+        <section class="bg-indigo-900 pt-16 pb-24 px-4 relative overflow-hidden text-center">
             <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-800 rounded-full blur-[100px] opacity-40 -translate-y-1/2 translate-x-1/2"></div>
-            <div class="max-w-4xl mx-auto text-center relative z-10">
+            <div class="max-w-4xl mx-auto relative z-10">
                 <h2 class="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter uppercase">Gerbang Carian Ilmu</h2>
                 <p class="text-indigo-200 mb-10 font-medium uppercase tracking-widest text-xs">PS Abu Nawas - Memacu Kreativiti, Menjana Inovasi</p>
                 <div class="max-w-2xl mx-auto relative group">
                     <i class="fas fa-search absolute left-6 top-6 text-indigo-400 text-xl group-focus-within:text-indigo-600 transition-colors"></i>
-                    <input type="text" id="searchInput" onkeyup="renderBooks()" placeholder="Cari tajuk buku, penulis atau ISBN..." 
+                    <input type="text" id="searchInput" onkeyup="renderBooks()" placeholder="Cari tajuk buku, kategori atau No Panggilan..." 
                         class="w-full pl-16 pr-6 py-6 rounded-3xl shadow-2xl outline-none text-xl font-medium border-4 border-transparent focus:border-indigo-400 transition-all">
                 </div>
             </div>
         </section>
 
         <main class="max-w-7xl mx-auto px-4 -mt-10 mb-20 relative z-20">
-            <div class="bg-white p-4 rounded-3xl shadow-xl border border-slate-100 flex flex-wrap items-center gap-3 mb-8">
-                <div class="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-r border-slate-100 mr-2">
-                    <i class="fas fa-filter"></i> Kategori
+            <!-- Quick Filter Categories -->
+            <div class="bg-white p-4 rounded-3xl shadow-xl border border-slate-100 flex flex-wrap items-center gap-3 mb-8 overflow-x-auto">
+                <div class="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-r border-slate-100 mr-2 whitespace-nowrap">
+                    <i class="fas fa-filter"></i> Koleksi
                 </div>
-                <button onclick="setCategory('Semua')" class="cat-btn bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase transition-all">Semua</button>
-                <div class="relative dropdown">
-                    <button class="cat-btn bg-white text-slate-500 border border-slate-100 px-5 py-2.5 rounded-xl text-xs font-black uppercase flex items-center gap-2 hover:bg-slate-50">
-                        Kanak-Kanak <i class="fas fa-chevron-down text-[10px]"></i>
-                    </button>
-                    <div class="dropdown-content absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-100 py-2 z-50">
-                        <button onclick="setCategory('Cerita Bahasa Melayu')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-700">Cerita Bahasa Melayu</button>
-                        <button onclick="setCategory('Cerita Bahasa Inggeris')" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-700">Cerita Bahasa Inggeris</button>
-                    </div>
-                </div>
-                <button onclick="setCategory('Sejarah')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-5 py-2.5 rounded-xl text-xs font-black uppercase hover:bg-slate-50 transition-all">Sejarah</button>
-                <button onclick="setCategory('Rujukan')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-5 py-2.5 rounded-xl text-xs font-black uppercase hover:bg-slate-50 transition-all">Rujukan</button>
+                <button onclick="setCategory('Semua')" class="cat-btn bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase transition-all whitespace-nowrap">Semua</button>
+                <button onclick="setCategory('Fiksyen Bahasa Melayu')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-5 py-2.5 rounded-xl text-xs font-black uppercase hover:bg-slate-50 transition-all whitespace-nowrap">Fiksyen BM</button>
+                <button onclick="setCategory('Ensiklopedia')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-5 py-2.5 rounded-xl text-xs font-black uppercase hover:bg-slate-50 transition-all whitespace-nowrap">Ensiklopedia</button>
+                <button onclick="setCategory('Buku Rujukan')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-5 py-2.5 rounded-xl text-xs font-black uppercase hover:bg-slate-50 transition-all whitespace-nowrap">Rujukan</button>
+                <button onclick="setCategory('Buku Ilmiah')" class="cat-btn bg-white text-slate-500 border border-slate-100 px-5 py-2.5 rounded-xl text-xs font-black uppercase hover:bg-slate-50 transition-all whitespace-nowrap">Ilmiah</button>
             </div>
 
             <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+            
             <div id="emptyState" class="hidden text-center py-24 bg-white rounded-[40px] shadow-xl border border-slate-100">
                 <i class="fas fa-book-open text-slate-100 text-7xl mb-4"></i>
-                <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Carian Tiada Hasil</h3>
-                <p class="text-slate-400 text-sm">Sila cuba kata kunci atau kategori yang lain.</p>
+                <h3 class="text-xl font-black text-slate-800 uppercase tracking-tight">Tiada Buku Ditemui</h3>
+                <p class="text-slate-400 text-sm">Sila masukkan kata kunci lain atau pastikan data telah disinkronkan.</p>
             </div>
         </main>
     </div>
@@ -97,7 +98,7 @@
                 <i class="fas fa-user-shield text-indigo-600 text-3xl"></i>
             </div>
             <h2 class="text-2xl font-black text-slate-800 uppercase tracking-tight mb-2">Log Masuk Admin</h2>
-            <p class="text-slate-400 text-sm mb-8">Hanya untuk kegunaan pengawas PSS dan pentadbir.</p>
+            <p class="text-slate-400 text-sm mb-8">Masukkan butiran untuk mengurus data buku.</p>
             
             <div class="space-y-4 text-left">
                 <div>
@@ -118,11 +119,33 @@
     <!-- ADMIN VIEW -->
     <div id="adminView" class="view hidden">
         <div class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Google Sheets Sync Panel -->
+            <div class="bg-indigo-900 p-8 rounded-[40px] shadow-2xl border border-indigo-700 mb-8 text-white relative overflow-hidden">
+                <div class="absolute right-0 top-0 opacity-10 p-10">
+                    <i class="fas fa-sync-alt text-9xl"></i>
+                </div>
+                <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-black uppercase tracking-tight mb-2">Kemaskini Auto (PSS Sentral)</h3>
+                        <p class="text-indigo-200 text-xs font-medium max-w-xl">Tarik maklumat daripada Google Sheets. Pastikan turutan kolum mengikut format CSV PSS Sentral (Title di kolum ke-6, ISBN di kolum ke-13, dll).</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+                        <input type="text" id="sheetUrl" class="w-full lg:w-96 p-4 bg-indigo-800 border border-indigo-700 rounded-2xl text-white outline-none placeholder:text-indigo-400 text-xs font-bold" placeholder="Pautan CSV (Published to Web)...">
+                        <button onclick="syncData()" id="syncBtn" class="bg-white text-indigo-900 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl shadow-indigo-950 flex items-center gap-3 whitespace-nowrap">
+                            <i class="fas fa-sync-alt"></i> Tarik Data
+                        </button>
+                    </div>
+                </div>
+                <div id="syncStatus" class="mt-4 text-[10px] font-black uppercase tracking-widest text-indigo-300 hidden">
+                    <i class="fas fa-circle-notch fa-spin mr-2"></i> Sedang memproses CSV PSS Sentral...
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Add Book Form -->
+                <!-- Add Book Form (Manual) -->
                 <div class="lg:col-span-1 bg-white p-8 rounded-[40px] shadow-xl border border-slate-100 h-fit">
                     <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-3 uppercase tracking-tight">
-                        <i class="fas fa-plus-circle text-indigo-600"></i> Tambah Naskah
+                        <i class="fas fa-plus-circle text-indigo-600"></i> Tambah Manual
                     </h3>
                     <div class="space-y-4">
                         <div id="imagePreviewContainer" class="image-preview">
@@ -133,30 +156,30 @@
                             <input type="file" id="addImage" accept="image/*" onchange="previewImage(event)" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
                         </label>
                         <input type="text" id="addTitle" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm" placeholder="Tajuk Buku">
-                        <input type="text" id="addAuthor" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm" placeholder="Nama Penulis">
-                        <select id="addCategory" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm">
-                            <option value="Cerita Bahasa Melayu">Cerita Bahasa Melayu</option>
-                            <option value="Cerita Bahasa Inggeris">Cerita Bahasa Inggeris</option>
-                            <option value="Sejarah">Sejarah</option>
-                            <option value="Rujukan">Rujukan</option>
-                            <option value="Teknologi">Teknologi</option>
-                        </select>
+                        <input type="text" id="addCategory" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm" placeholder="Koleksi (Contoh: Fiksyen BM)">
                         <div class="grid grid-cols-2 gap-4">
-                            <input type="text" id="addShelf" class="p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm uppercase" placeholder="KOD RAK">
+                            <input type="text" id="addShelf" class="p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm uppercase" placeholder="No Panggilan">
                             <input type="text" id="addIsbn" class="p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-sm" placeholder="ISBN">
                         </div>
-                        <button onclick="addBook()" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-black py-4 rounded-2xl shadow-xl transition-all uppercase tracking-widest">Simpan Buku</button>
+                        <button onclick="addBook()" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-black py-4 rounded-2xl shadow-xl transition-all uppercase tracking-widest">Simpan Manual</button>
                     </div>
                 </div>
+                
                 <!-- Inventory List -->
                 <div class="lg:col-span-2 bg-white rounded-[40px] shadow-xl border border-slate-100 overflow-hidden">
-                    <div class="p-6 bg-slate-50 border-b border-slate-100 font-black text-slate-800 uppercase tracking-tight">Inventori Semasa</div>
-                    <div class="overflow-x-auto">
+                    <div class="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                        <div class="font-black text-slate-800 uppercase tracking-tight">Inventori Semasa (<span id="bookCount">0</span>)</div>
+                        <button onclick="clearAllData()" class="text-[9px] font-black text-red-500 uppercase tracking-widest hover:text-red-700 flex items-center gap-1">
+                            <i class="fas fa-trash"></i> Padam Semua
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto max-h-[700px]">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest sticky top-0 z-10 shadow-sm">
                                 <tr>
-                                    <th class="px-6 py-4">Buku & Penulis</th>
-                                    <th class="px-6 py-4">Kategori</th>
+                                    <th class="px-6 py-4">Buku</th>
+                                    <th class="px-6 py-4">Koleksi</th>
+                                    <th class="px-6 py-4">No Panggilan</th>
                                     <th class="px-6 py-4 text-right">Tindakan</th>
                                 </tr>
                             </thead>
@@ -179,17 +202,15 @@
     </footer>
 
     <script>
-        // DATA BUKU
-        let books = JSON.parse(localStorage.getItem('pss_books')) || [
-            { id: 1, title: "Misi Angkasa Lepas", author: "Dr. Nazmi", category: "Cerita Bahasa Melayu", isbn: "978-01", shelf: "K1-01", status: "Tersedia", image: null },
-            { id: 2, title: "The Hungry Caterpillar", author: "Eric Carle", category: "Cerita Bahasa Inggeris", isbn: "978-02", shelf: "K2-05", status: "Dipinjam", image: null },
-            { id: 3, title: "Sejarah Kesultanan Melayu", author: "Tun Ahmad", category: "Sejarah", isbn: "978-03", shelf: "S3-01", status: "Tersedia", image: null }
-        ];
+        // DATA BUKU - Initialized from localStorage or empty
+        let books = JSON.parse(localStorage.getItem('pss_books')) || [];
 
         let currentCategory = "Semua";
         let currentImageBase64 = null;
 
-        // VIEW CONTROLLER
+        // UI Initialization
+        document.getElementById('sheetUrl').value = localStorage.getItem('pss_sheet_url') || "";
+
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
             document.getElementById(viewId + 'View').classList.remove('hidden');
@@ -202,7 +223,7 @@
             window.scrollTo(0, 0);
         }
 
-        // AUTHENTICATION
+        // AUTH
         function handleLogin() {
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
@@ -224,7 +245,7 @@
             showView('user');
         }
 
-        // IMAGE PREVIEW
+        // PREVIEW IMAGE
         function previewImage(event) {
             const file = event.target.files[0];
             if (file) {
@@ -237,7 +258,105 @@
             }
         }
 
-        // BOOK LOGIC
+        /**
+         * CSV Parser for PSS Sentral Format
+         * Kolum penting:
+         * 5: Title
+         * 6: Koleksi (Category)
+         * 8: Call nmbr1
+         * 9: Call nmbr2
+         * 12: Isbn no
+         * 14: Status
+         */
+        async function syncData() {
+            const url = document.getElementById('sheetUrl').value.trim();
+            if (!url) return alert("Sila masukkan pautan CSV!");
+            
+            localStorage.setItem('pss_sheet_url', url);
+            const status = document.getElementById('syncStatus');
+            const btn = document.getElementById('syncBtn');
+            
+            status.classList.remove('hidden');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            try {
+                // Bypass CORS via proxy
+                const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+                const csvData = await response.text();
+                
+                // Parse CSV intelligently (handle quotes and commas inside quotes)
+                const rows = parseCSV(csvData);
+                
+                // Skip Header
+                const dataRows = rows.slice(1);
+                const newBooks = dataRows.filter(r => r[5] && r[5].trim() !== "").map(r => {
+                    const clean = (val) => (val || "").trim().replace(/^"|"$/g, '');
+                    
+                    return {
+                        id: 'sheet-' + Math.random().toString(36).substr(2, 9),
+                        title: clean(r[5]),
+                        category: clean(r[6]) || "Tiada Koleksi",
+                        shelf: `${clean(r[8])} ${clean(r[9])}`.trim() || "-",
+                        isbn: clean(r[12]) || "-",
+                        status: clean(r[14]) || "Tersedia",
+                        image: null,
+                        source: 'sheets'
+                    };
+                });
+
+                if (newBooks.length === 0) throw new Error("Format CSV tidak dikenali atau tiada data.");
+
+                // Merge (Unique by ISBN + Title to avoid duplicates)
+                const existingKeys = new Set(books.map(b => `${b.title}-${b.isbn}`));
+                const filteredNew = newBooks.filter(nb => !existingKeys.has(`${nb.title}-${nb.isbn}`));
+
+                books = [...filteredNew, ...books];
+                localStorage.setItem('pss_books', JSON.stringify(books));
+                
+                alert(`Berjaya! ${filteredNew.length} buku baharu ditambah.`);
+                renderAdminTable();
+            } catch (error) {
+                console.error(error);
+                alert("Gagal menarik data. Pastikan pautan Google Sheets adalah CSV dan 'Published to Web'.");
+            } finally {
+                status.classList.add('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            }
+        }
+
+        // Helper function to parse CSV robustly
+        function parseCSV(text) {
+            const result = [];
+            let row = [];
+            let cell = "";
+            let insideQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char === '"') {
+                    insideQuotes = !insideQuotes;
+                } else if (char === ',' && !insideQuotes) {
+                    row.push(cell);
+                    cell = "";
+                } else if (char === '\n' && !insideQuotes) {
+                    row.push(cell);
+                    result.push(row);
+                    row = [];
+                    cell = "";
+                } else {
+                    cell += char;
+                }
+            }
+            if (row.length > 0 || cell !== "") {
+                row.push(cell);
+                result.push(row);
+            }
+            return result;
+        }
+
+        // RENDER FUNCTIONS
         function setCategory(cat) {
             currentCategory = cat;
             document.querySelectorAll('.cat-btn').forEach(btn => {
@@ -255,7 +374,9 @@
             grid.innerHTML = "";
 
             const filtered = books.filter(b => {
-                const matchesSearch = b.title.toLowerCase().includes(search) || b.author.toLowerCase().includes(search);
+                const matchesSearch = b.title.toLowerCase().includes(search) || 
+                                     b.category.toLowerCase().includes(search) || 
+                                     b.shelf.toLowerCase().includes(search);
                 const matchesCat = currentCategory === "Semua" || b.category === currentCategory;
                 return matchesSearch && matchesCat;
             });
@@ -267,27 +388,32 @@
 
             empty.classList.add('hidden');
             filtered.forEach(b => {
+                const isAvailable = b.status.toLowerCase().includes('boleh dipinjam') || b.status.toLowerCase().includes('tersedia');
+                const badgeColor = isAvailable ? 'bg-green-500' : 'bg-amber-500';
+
                 const imageHtml = b.image 
                     ? `<img src="${b.image}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">`
-                    : `<i class="fas fa-book-open text-slate-200 text-5xl group-hover:scale-110 transition-transform"></i>`;
+                    : `<div class="w-full h-full flex flex-col items-center justify-center bg-indigo-50 text-indigo-200 group-hover:text-indigo-400 transition-colors">
+                         <i class="fas fa-book-open text-5xl mb-2"></i>
+                         <span class="text-[8px] font-black uppercase tracking-widest">${b.shelf}</span>
+                       </div>`;
 
                 grid.innerHTML += `
                     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col group fade-in">
                         <div class="h-56 bg-slate-50 flex items-center justify-center relative overflow-hidden">
                             ${imageHtml}
-                            <div class="absolute bottom-4 left-4 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter ${b.status === 'Tersedia' ? 'bg-green-500' : 'bg-red-500'} text-white shadow-lg">
+                            <div class="absolute bottom-4 left-4 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter ${badgeColor} text-white shadow-lg">
                                 ${b.status}
                             </div>
                         </div>
                         <div class="p-6">
                             <span class="text-[8px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md uppercase tracking-widest mb-2 inline-block">${b.category}</span>
-                            <h3 class="font-black text-slate-800 text-base mb-1 line-clamp-2 leading-tight">${b.title}</h3>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-4">${b.author}</p>
-                            <div class="pt-4 border-t border-slate-50 flex items-center justify-between">
+                            <h3 class="font-black text-slate-800 text-sm mb-1 line-clamp-2 leading-tight h-10 overflow-hidden uppercase">${b.title}</h3>
+                            <div class="pt-4 mt-4 border-t border-slate-50 flex items-center justify-between">
                                 <div class="flex items-center gap-1.5 text-slate-800 font-black text-[10px] uppercase">
-                                    <i class="fas fa-map-marker-alt text-red-400"></i> ${b.shelf}
+                                    <i class="fas fa-bookmark text-indigo-400"></i> ${b.shelf}
                                 </div>
-                                <i class="fas fa-arrow-right text-indigo-200 text-xs"></i>
+                                <div class="text-[8px] font-bold text-slate-300">#${b.isbn}</div>
                             </div>
                         </div>
                     </div>
@@ -297,66 +423,89 @@
 
         function renderAdminTable() {
             const tbody = document.getElementById('adminTableBody');
+            document.getElementById('bookCount').textContent = books.length;
             tbody.innerHTML = "";
             books.forEach(b => {
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/50">
+                    <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="px-6 py-4 flex items-center gap-4">
                             <div class="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden flex items-center justify-center flex-shrink-0">
-                                ${b.image ? `<img src="${b.image}" class="w-full h-full object-cover">` : `<i class="fas fa-image text-slate-300"></i>`}
+                                ${b.image ? `<img src="${b.image}" class="w-full h-full object-cover">` : `<i class="fas fa-book text-slate-300 text-xs"></i>`}
                             </div>
-                            <div>
-                                <div class="font-bold text-slate-800">${b.title}</div>
-                                <div class="text-[10px] text-slate-400 font-bold uppercase">${b.author}</div>
+                            <div class="max-w-xs">
+                                <div class="font-bold text-slate-800 text-xs line-clamp-1 uppercase">${b.title}</div>
+                                <div class="text-[9px] text-slate-400 font-bold">ISBN: ${b.isbn}</div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <span class="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md uppercase">${b.category}</span>
                         </td>
+                        <td class="px-6 py-4">
+                             <div class="text-xs font-black text-slate-700">${b.shelf}</div>
+                        </td>
                         <td class="px-6 py-4 text-right">
-                            <button onclick="deleteBook(${b.id})" class="text-red-300 hover:text-red-600 p-2"><i class="fas fa-trash-alt"></i></button>
+                            <button onclick="deleteBook('${b.id}')" class="text-slate-300 hover:text-red-600 p-2 transition-colors"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     </tr>
                 `;
             });
         }
 
+        // MANUAL ACTIONS
         function addBook() {
-            const title = document.getElementById('addTitle').value;
-            const author = document.getElementById('addAuthor').value;
-            const category = document.getElementById('addCategory').value;
-            const shelf = document.getElementById('addShelf').value;
-            const isbn = document.getElementById('addIsbn').value;
+            const title = document.getElementById('addTitle').value.trim();
+            const category = document.getElementById('addCategory').value.trim();
+            const shelf = document.getElementById('addShelf').value.trim();
+            const isbn = document.getElementById('addIsbn').value.trim();
 
-            if (!title || !author) return alert("Sila isi tajuk dan penulis!");
+            if (!title) return alert("Tajuk buku wajib diisi!");
 
             const newBook = {
-                id: Date.now(),
-                title, author, category, shelf: shelf || "K1", isbn: isbn || "-", status: "Tersedia",
-                image: currentImageBase64
+                id: 'man-' + Date.now(),
+                title, 
+                category: category || "Umum", 
+                shelf: shelf || "K1", 
+                isbn: isbn || "-", 
+                status: "Tersedia",
+                image: currentImageBase64,
+                source: 'manual'
             };
 
             books.unshift(newBook);
             localStorage.setItem('pss_books', JSON.stringify(books));
             renderAdminTable();
             
-            // Clear fields
+            // Clear UI
             document.getElementById('addTitle').value = "";
-            document.getElementById('addAuthor').value = "";
+            document.getElementById('addCategory').value = "";
             document.getElementById('addShelf').value = "";
             document.getElementById('addIsbn').value = "";
             document.getElementById('addImage').value = "";
             document.getElementById('imagePreviewContainer').innerHTML = `<span class="text-slate-300 text-[10px] font-bold uppercase tracking-widest">Tiada Gambar</span>`;
             currentImageBase64 = null;
+            alert("Buku ditambah secara manual!");
         }
 
         function deleteBook(id) {
-            books = books.filter(b => b.id !== id);
-            localStorage.setItem('pss_books', JSON.stringify(books));
-            renderAdminTable();
+            if (confirm("Padam buku ini?")) {
+                books = books.filter(b => b.id !== id);
+                localStorage.setItem('pss_books', JSON.stringify(books));
+                renderAdminTable();
+            }
         }
 
-        window.onload = () => renderBooks();
+        function clearAllData() {
+            if (confirm("AWAS! Ini akan memadam semua data buku (daripada CSV dan manual). Teruskan?")) {
+                books = [];
+                localStorage.setItem('pss_books', JSON.stringify(books));
+                renderAdminTable();
+            }
+        }
+
+        // INIT
+        window.onload = () => {
+            renderBooks();
+        };
     </script>
 </body>
 </html>
